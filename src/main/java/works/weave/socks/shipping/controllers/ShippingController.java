@@ -1,6 +1,10 @@
 package works.weave.socks.shipping.controllers;
 
 import com.rabbitmq.client.Channel;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Extension;
+import io.swagger.annotations.ExtensionProperty;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.ChannelCallback;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -17,24 +21,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Api(tags = "shipping apis")
 @RestController
 public class ShippingController {
 
     @Autowired
     RabbitTemplate rabbitTemplate;
 
-    @RequestMapping(value = "/shipping", method = RequestMethod.GET)
+    @ApiOperation(value = "get shipping",
+            extensions = @Extension(properties = {@ExtensionProperty(name = "x-forward-compatible-marker", value = "0")})
+    )
+    @GetMapping(value = "/shipping")
     public String getShipping() {
         return "GET ALL Shipping Resource.";
     }
 
-    @RequestMapping(value = "/shipping/{id}", method = RequestMethod.GET)
+    @ApiOperation(value = "get shipping with id",
+            extensions = @Extension(properties = {@ExtensionProperty(name = "x-forward-compatible-marker", value = "0")})
+    )
+    @GetMapping(value = "/shipping/{id}")
     public String getShippingById(@PathVariable String id) {
         return "GET Shipping Resource with id: " + id;
     }
 
+    @ApiOperation(value = "create shipping and use mq",
+            extensions = @Extension(properties = {@ExtensionProperty(name = "x-forward-compatible-marker", value = "0")})
+    )
     @ResponseStatus(HttpStatus.CREATED)
-    @RequestMapping(value = "/shipping", method = RequestMethod.POST)
+    @PostMapping(value = "/shipping")
     public
     @ResponseBody
     Shipment postShipping(@RequestBody Shipment shipment) {
@@ -48,8 +62,11 @@ public class ShippingController {
         return shipment;
     }
 
+    @ApiOperation(value = "get service's health",
+            extensions = @Extension(properties = {@ExtensionProperty(name = "x-forward-compatible-marker", value = "0")})
+    )
     @ResponseStatus(HttpStatus.OK)
-    @RequestMapping(method = RequestMethod.GET, path = "/health")
+    @GetMapping(path = "/health")
     public
     @ResponseBody
     Map<String, List<HealthCheck>> getHealth() {
