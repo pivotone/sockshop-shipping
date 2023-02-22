@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import works.weave.socks.shipping.entities.HealthCheck;
+import works.weave.socks.shipping.entities.Result;
 import works.weave.socks.shipping.entities.Shipment;
+import works.weave.socks.shipping.utils.ResultUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -32,16 +34,16 @@ public class ShippingController {
             extensions = @Extension(properties = {@ExtensionProperty(name = "x-forward-compatible-marker", value = "0")})
     )
     @GetMapping(value = "/shipping")
-    public String getShipping() {
-        return "GET ALL Shipping Resource.";
+    public Result getShipping() {
+        return ResultUtil.success();
     }
 
     @ApiOperation(value = "get shipping with id",
             extensions = @Extension(properties = {@ExtensionProperty(name = "x-forward-compatible-marker", value = "0")})
     )
     @GetMapping(value = "/shipping/{id}")
-    public String getShippingById(@PathVariable String id) {
-        return "GET Shipping Resource with id: " + id;
+    public Result getShippingById(@PathVariable String id) {
+        return ResultUtil.success("GET Shipping Resource with id: " + id, null);
     }
 
     @ApiOperation(value = "create shipping and use mq",
@@ -51,7 +53,7 @@ public class ShippingController {
     @PostMapping(value = "/shipping")
     public
     @ResponseBody
-    Shipment postShipping(@RequestBody Shipment shipment) {
+    Result postShipping(@RequestBody Shipment shipment) {
         System.out.println("Adding shipment to queue...");
         try {
             rabbitTemplate.convertAndSend("shipping-task", shipment);
@@ -59,7 +61,7 @@ public class ShippingController {
             System.out.println("Unable to add to queue (the queue is probably down). Accepting anyway. Don't do this " +
                     "for real!");
         }
-        return shipment;
+        return ResultUtil.success(shipment);
     }
 
     @ApiOperation(value = "get service's health",
@@ -69,7 +71,7 @@ public class ShippingController {
     @GetMapping(path = "/health")
     public
     @ResponseBody
-    Map<String, List<HealthCheck>> getHealth() {
+    Result getHealth() {
         Map<String, List<HealthCheck>> map = new HashMap<String, List<HealthCheck>>();
         List<HealthCheck> healthChecks = new ArrayList<HealthCheck>();
         Date dateNow = Calendar.getInstance().getTime();
@@ -93,6 +95,6 @@ public class ShippingController {
         healthChecks.add(app);
 
         map.put("health", healthChecks);
-        return map;
+        return ResultUtil.success(map);
     }
 }
